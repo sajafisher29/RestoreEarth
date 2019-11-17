@@ -1,3 +1,26 @@
 <resources>
     <string name="app_name">RestoreEarth</string>
+    <string name="title_home">Home</string>
+    <string name="submit_confirmation">Submitted!</string>
+    <string name="Add_task">Add Task</string>
+    <string name="All_tasks">All Tasks</string>
+    <string name="Settings">Settings</string>
+    <string name="username_hint">Username</string>
+    <string name="save_username_button">Save Username</string>
+    <string name="Hello">Hello</string>
+    <string name="Hello_to_concat">Hello </string>
+    <string name="End_of_hello">!</string>
+    <string name="task_view_preference">Number of tasks</string>
+    <string name="task_view_preference_prompt">How many tasks would you like to see on the homepage?</string>
+    <string name="save_tasks_view_preference">Save Tasks Preference</string>
+    <string name="sign_in_button">Sign In</string>
+    <string name="sign_out_button">Sign Out</string>
+    <string name="choose_existing_team">Choose an existing team</string>
+    <string name="select_team">Select Team</string>
+    <string name="submit_file">Submit</string>
+    <string name="task_state_new">New</string>
+    <string name="task_state_in_progress">In progress</string>
+    <string name="task_state_assigned">Assigned</string>
+    <string name="task_state_completed">Completed</string>
+    <string name="get_location">Get Location</string>
 </resources>
