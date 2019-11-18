@@ -1,11 +1,62 @@
 package com.fisher.restoreearth.Activities;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.app.ActivityCompat;
 
+import android.content.Intent;
+import android.database.Cursor;
+import android.location.Address;
+import android.location.Geocoder;
+import android.location.Location;
+import android.net.Uri;
 import android.os.Bundle;
+import android.os.Environment;
+import android.os.Handler;
+import android.os.Looper;
+import android.os.Message;
+import android.provider.MediaStore;
+import android.telecom.Call;
+import android.util.Log;
+import android.view.View;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
+import android.widget.EditText;
 import android.widget.ImageView;
+import android.widget.Spinner;
+import android.widget.Toast;
 
+import com.amazonaws.Response;
+import com.amazonaws.mobile.client.AWSMobileClient;
+import com.amazonaws.mobile.client.Callback;
+import com.amazonaws.mobile.config.AWSConfiguration;
+import com.amazonaws.mobileconnectors.appsync.AWSAppSyncClient;
+import com.amazonaws.mobileconnectors.appsync.fetcher.AppSyncResponseFetchers;
+import com.amazonaws.mobileconnectors.pinpoint.PinpointManager;
+import com.amazonaws.mobileconnectors.pinpoint.analytics.SessionClient;
+import com.amazonaws.mobileconnectors.s3.transferutility.TransferObserver;
+import com.amazonaws.mobileconnectors.s3.transferutility.TransferService;
+import com.amazonaws.mobileconnectors.s3.transferutility.TransferUtility;
+import com.amazonaws.services.s3.AmazonS3Client;
+import com.apollographql.apollo.GraphQLCall;
+import com.apollographql.apollo.exception.ApolloException;
 import com.fisher.restoreearth.R;
+import com.google.android.gms.location.FusedLocationProviderClient;
+import com.google.android.gms.location.LocationServices;
+import com.google.android.gms.tasks.OnSuccessListener;
+
+import org.jetbrains.annotations.NotNull;
+
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Locale;
+import java.util.UUID;
+
+import javax.annotation.Nonnull;
 
 public class AddATask extends AppCompatActivity implements AdapterView.OnItemSelectedListener {
 
@@ -69,6 +120,7 @@ public class AddATask extends AppCompatActivity implements AdapterView.OnItemSel
         getApplicationContext().startService(new Intent(getApplicationContext(), TransferService.class));
 
         this.teams = new LinkedList<>();
+
         queryAllTeams();
     }
 
@@ -84,14 +136,14 @@ public class AddATask extends AppCompatActivity implements AdapterView.OnItemSel
                     new Thread(new Runnable() {
                         @Override
                         public void run() {
-                            Geocoder geocoder = new Geocoder(AddTask.this, Locale.getDefault());
+                            Geocoder geocoder = new Geocoder(AddATask.this, Locale.getDefault());
                             try {
                                 List<Address> addresses = geocoder.getFromLocation(location.getLatitude(), location.getLongitude(), 1);
                                 currentLocation = addresses.get(0).getAddressLine(0);
                                 currentLocation = currentLocation + " | lat:" + location.getLatitude() + ", long: " + location.getLongitude();
-                            } catch (IOException e) {
-                                Log.e(TAG, e.getMessage());
-                                e.printStackTrace();
+                            } catch (IOException error) {
+                                Log.e(TAG, error.getMessage());
+                                error.printStackTrace();
                             }
                         }
                     }).run();
@@ -121,16 +173,16 @@ public class AddATask extends AppCompatActivity implements AdapterView.OnItemSel
 
     class PostTasksToBackendServer implements Callback {
 
-        AddTask addTaskActivity;
+        AddATask addTaskActivity;
 
-        public PostTasksToBackendServer(AddTask addTaskActivity) {
+        public PostTasksToBackendServer(AddATask addTaskActivity) {
             this.addTaskActivity = addTaskActivity;
         }
 
         @Override
-        public void onFailure(@NotNull Call call, @NotNull IOException e) {
-            Log.e(TAG, "something went wrong with connecting to backend server");
-            Log.e(TAG, e.getMessage());
+        public void onFailure(@NotNull Call call, @NotNull IOException error) {
+            Log.e(TAG, "Error connecting to backend server");
+            Log.e(TAG, error.getMessage());
         }
 
         @Override
@@ -149,7 +201,7 @@ public class AddATask extends AppCompatActivity implements AdapterView.OnItemSel
 
     //////////////////////////// AWS GraphQL methods ///////////////////////////////
 
-    // Insert a new task
+    // Insert new task
     public void runAddTaskMutation(String title, String description, type.TaskState state, ListTeamsQuery.Item selectedTeam) {
         String fileKey = UUID.randomUUID().toString();
         this.filePath = convertUriToFilePath(fileUri);
@@ -177,8 +229,8 @@ public class AddATask extends AppCompatActivity implements AdapterView.OnItemSel
 
                 output.flush();
                 input.close();
-            } catch(IOException e) {
-                Log.e(TAG, e.getMessage());
+            } catch(IOException error) {
+                Log.e(TAG, error.getMessage());
             }
 
             CreateS3ObjectInput s3ObjectInput = CreateS3ObjectInput.builder()
@@ -213,8 +265,8 @@ public class AddATask extends AppCompatActivity implements AdapterView.OnItemSel
         }
 
         @Override
-        public void onFailure(@Nonnull ApolloException e) {
-            Log.e(TAG, e.getMessage());
+        public void onFailure(@Nonnull ApolloException error) {
+            Log.e(TAG, error.getMessage());
         }
     };
 
@@ -241,11 +293,11 @@ public class AddATask extends AppCompatActivity implements AdapterView.OnItemSel
                     }
 
                     Spinner spinner =  findViewById(R.id.spinner_select_team);
-                    ArrayAdapter<String> adapter = new ArrayAdapter<>(AddTask.this, android.R.layout.simple_spinner_item, teamNames);
+                    ArrayAdapter<String> adapter = new ArrayAdapter<>(AddATask.this, android.R.layout.simple_spinner_item, teamNames);
                     // Specify the layout to use when the list of choices appears
                     adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
                     spinner.setAdapter(adapter);
-                    spinner.setOnItemSelectedListener(AddTask.this);
+                    spinner.setOnItemSelectedListener(AddATask.this);
                 }
             };
 
@@ -253,8 +305,8 @@ public class AddATask extends AppCompatActivity implements AdapterView.OnItemSel
         }
 
         @Override
-        public void onFailure(@Nonnull ApolloException e) {
-            Log.e("error", "error getting teams from cloud database");
+        public void onFailure(@Nonnull ApolloException error) {
+            Log.e("Error", "Error pulling teams from cloud database");
         }
     };
 
@@ -264,13 +316,11 @@ public class AddATask extends AppCompatActivity implements AdapterView.OnItemSel
     }
 
     @Override
-    public void onNothingSelected(AdapterView<?> parent) {
-
-    }
+    public void onNothingSelected(AdapterView<?> parent) {}
 
     ///////////////////////////////////// S3 Storage Code //////////////////////////////////////////
 
-    // fires an intent to spin up the "file chooser" UI and select a file
+    // Triggers intent to launch "file chooser" UI and select a file
     public void pickFile(View view) {
         Intent intent = new Intent(Intent.ACTION_PICK, android.provider.MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
 
@@ -326,8 +376,8 @@ public class AddATask extends AppCompatActivity implements AdapterView.OnItemSel
         }
 
         @Override
-        public void onFailure(@Nonnull ApolloException e) {
-            Log.e("filepath", e.getMessage());
+        public void onFailure(@Nonnull ApolloException error) {
+            Log.e("filepath", error.getMessage());
         }
     };
 

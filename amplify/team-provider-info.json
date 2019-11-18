@@ -1,0 +1,19 @@
+{
+    "parkapp": {
+        "awscloudformation": {
+            "AuthRoleName": "amplify-restoreearth-parkapp-120106-authRole",
+            "UnauthRoleArn": "arn:aws:iam::862750062005:role/amplify-restoreearth-parkapp-120106-unauthRole",
+            "AuthRoleArn": "arn:aws:iam::862750062005:role/amplify-restoreearth-parkapp-120106-authRole",
+            "Region": "us-west-2",
+            "DeploymentBucketName": "amplify-restoreearth-parkapp-120106-deployment",
+            "UnauthRoleName": "amplify-restoreearth-parkapp-120106-unauthRole",
+            "StackName": "amplify-restoreearth-parkapp-120106",
+            "StackId": "arn:aws:cloudformation:us-west-2:862750062005:stack/amplify-restoreearth-parkapp-120106/fd8946f0-0974-11ea-869e-065639e88e5c"
+        },
+        "categories": {
+            "auth": {
+                "restoreearthdaae1852": {}
+            }
+        }
+    }
+}

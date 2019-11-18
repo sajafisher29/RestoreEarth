@@ -1,6 +1,28 @@
 package com.fisher.restoreearth.Activities;
 
+import android.graphics.BitmapFactory;
 import android.os.Bundle;
+import android.os.Environment;
+import android.os.Handler;
+import android.os.Looper;
+import android.os.Message;
+import android.util.Log;
+import android.view.View;
+import android.widget.ImageView;
+import android.widget.TextView;
+import com.amazonaws.mobile.client.AWSMobileClient;
+import com.amazonaws.mobile.config.AWSConfiguration;
+import com.amazonaws.mobileconnectors.appsync.AWSAppSyncClient;
+import com.amazonaws.mobileconnectors.s3.transferutility.TransferListener;
+import com.amazonaws.mobileconnectors.s3.transferutility.TransferObserver;
+import com.amazonaws.mobileconnectors.s3.transferutility.TransferState;
+import com.amazonaws.mobileconnectors.s3.transferutility.TransferUtility;
+import com.amazonaws.services.s3.AmazonS3Client;
+import com.apollographql.apollo.GraphQLCall;
+import com.apollographql.apollo.exception.ApolloException;
+import com.fisher.restoreearth.R;
+import java.io.File;
+import javax.annotation.Nonnull;
 
 public class TaskDetails {
 
@@ -58,9 +80,7 @@ public class TaskDetails {
                 }
 
                 @Override
-                public void onProgressChanged(int id, long bytesCurrent, long bytesTotal) {
-
-                }
+                public void onProgressChanged(int id, long bytesCurrent, long bytesTotal) {}
 
                 @Override
                 public void onError(int id, Exception ex) {
@@ -72,10 +92,11 @@ public class TaskDetails {
         taskDetailTitle.setText(title);
         taskDetailDescription.setText("Task Description: " + description);
         taskDetailState.setText("Task State: " + state);
+
         if (location != null) {
             taskDetailLocation.setText("Task Location: " + location);
         } else {
-            taskDetailLocation.setText("Task Location: Not Available");
+            taskDetailLocation.setText("Task Location: Not available");
         }
     }
 
@@ -91,8 +112,8 @@ public class TaskDetails {
         }
 
         @Override
-        public void onFailure(@Nonnull ApolloException e) {
-            Log.e(TAG, e.getMessage());
+        public void onFailure(@Nonnull ApolloException error) {
+            Log.e(TAG, error.getMessage());
         }
     };
 }

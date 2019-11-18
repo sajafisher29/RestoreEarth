@@ -20,6 +20,7 @@ android {
 }
 
 apply plugin: 'com.amazonaws.appsync'
+apply plugin: 'com.android.application'
 
 dependencies {
 
@@ -68,11 +69,15 @@ dependencies {
 
     //Firebase
     implementation 'com.google.firebase:firebase-core:16.0.1'
-    implementation 'com.google.firebase:firebase-messaging:17.3.0'
+    implementation 'com.google.firebase:firebase-messaging:20.0.1'
 
     //Pinpoint
     implementation 'com.amazonaws:aws-android-sdk-pinpoint:2.15.+'
 
+    // add the Firebase SDK for Google Analytics
+    implementation 'com.google.firebase:firebase-analytics:16.0.0'
+    // add SDKs for any other desired Firebase products
+    // https://firebase.google.com/docs/android/setup#available-libraries
 }
 
 apply plugin: 'com.google.gms.google-services'

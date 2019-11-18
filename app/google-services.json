@@ -1,0 +1,40 @@
+{
+  "project_info": {
+    "project_number": "923751333775",
+    "firebase_url": "https://restoreearth-android.firebaseio.com",
+    "project_id": "restoreearth-android",
+    "storage_bucket": "restoreearth-android.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:923751333775:android:1a6eb42bba3d158dfbd5fa",
+        "android_client_info": {
+          "package_name": "com.fisher.restoreearth"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "923751333775-locplriato44qcmuvvelo2vvg53kk6qn.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBuRaZ2VDHfAWGZax-dPnLjdxbXXQNKBLQ"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "923751333775-locplriato44qcmuvvelo2vvg53kk6qn.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

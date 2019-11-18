@@ -1,10 +1,22 @@
 package com.fisher.restoreearth.Activities;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.preference.PreferenceManager;
 
+import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.util.Log;
+import android.view.View;
+import android.widget.EditText;
+import android.widget.Toast;
 
+import com.amazonaws.mobile.config.AWSConfiguration;
+import com.amazonaws.mobileconnectors.appsync.AWSAppSyncClient;
+import com.apollographql.apollo.GraphQLCall;
+import com.apollographql.apollo.exception.ApolloException;
 import com.fisher.restoreearth.R;
+
+import javax.annotation.Nonnull;
 
 public class Settings extends AppCompatActivity {
 
@@ -61,8 +73,8 @@ public class Settings extends AppCompatActivity {
         }
 
         @Override
-        public void onFailure(@Nonnull ApolloException e) {
-            Log.e(TAG, e.getMessage());
+        public void onFailure(@Nonnull ApolloException error) {
+            Log.e(TAG, error.getMessage());
         }
     };
 }

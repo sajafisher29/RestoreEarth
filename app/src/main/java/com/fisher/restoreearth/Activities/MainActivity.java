@@ -1,12 +1,46 @@
 package com.fisher.restoreearth.Activities;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import android.content.Context;
+import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
+import android.os.Message;
+import android.util.Log;
+import android.view.View;
 import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
+import android.widget.Spinner;
+import android.widget.TextView;
 
+import com.amazonaws.mobile.client.AWSMobileClient;
+import com.amazonaws.mobile.client.Callback;
+import com.amazonaws.mobile.client.SignInUIOptions;
+import com.amazonaws.mobile.client.UserStateDetails;
+import com.amazonaws.mobile.config.AWSConfiguration;
+import com.amazonaws.mobileconnectors.appsync.AWSAppSyncClient;
+import com.amazonaws.mobileconnectors.appsync.AppSyncSubscriptionCall;
+import com.amazonaws.mobileconnectors.appsync.fetcher.AppSyncResponseFetchers;
+import com.amazonaws.mobileconnectors.pinpoint.PinpointConfiguration;
+import com.amazonaws.mobileconnectors.pinpoint.PinpointManager;
+import com.apollographql.apollo.GraphQLCall;
+import com.apollographql.apollo.exception.ApolloException;
+import com.fisher.restoreearth.Model.Task;
+import com.fisher.restoreearth.Model.TaskAdapter;
 import com.fisher.restoreearth.R;
+import com.google.firebase.iid.FirebaseInstanceId;
+import com.google.firebase.iid.InstanceIdResult;
+
+import java.util.LinkedList;
+import java.util.List;
+
+import javax.annotation.Nonnull;
 
 public class MainActivity extends AppCompatActivity implements TaskAdapter.OnTaskInteractionListener, AdapterView.OnItemSelectedListener{
 
@@ -35,8 +69,8 @@ public class MainActivity extends AppCompatActivity implements TaskAdapter.OnTas
             }
 
             @Override
-            public void onError(Exception e) {
-                Log.e(COGNITO, e.getMessage());
+            public void onError(Exception error) {
+                Log.e(COGNITO, error.getMessage());
             }
         });
 
@@ -83,21 +117,19 @@ public class MainActivity extends AppCompatActivity implements TaskAdapter.OnTas
                 // AWS call this method when a new Task is created
 //                Task newTask = new Task(response.data().onCreateTask().title(), response.data().onCreateTask().body(), response.data().onCreateTask().state());
 //                taskAdapter.addTask(newTask);
-
             }
 
             @Override
-            public void onFailure(@Nonnull ApolloException e) {
-                Log.e(TAG, e.getMessage());
+            public void onFailure(@Nonnull ApolloException error) {
+                Log.e(TAG, error.getMessage());
             }
 
             @Override
             public void onCompleted() {
                 // call this once when you subscribe
-                Log.i(TAG, "subscribed to task");
+                Log.i(TAG, "Subscribed to task");
             }
         });
-
     }
 
     @Override
@@ -109,13 +141,8 @@ public class MainActivity extends AppCompatActivity implements TaskAdapter.OnTas
     }
 
     public void redirectToAddTaskActivity(View view) {
-        Intent addTaskIntent = new Intent(this, AddTask.class);
+        Intent addTaskIntent = new Intent(this, AddATask.class);
         startActivity(addTaskIntent);
-    }
-
-    public void redirectToAddTeamActivity(View view) {
-        Intent addTeamIntent = new Intent(this, AddTeam.class);
-        startActivity(addTeamIntent);
     }
 
     public void redirectToSettingActivity(View view) {
@@ -125,7 +152,7 @@ public class MainActivity extends AppCompatActivity implements TaskAdapter.OnTas
 
     @Override
     public void redirectToTaskDetailPage(Task task) {
-        Intent taskDetailIntent = new Intent(this, TaskDetail.class);
+        Intent taskDetailIntent = new Intent(this, TaskDetails.class);
         taskDetailIntent.putExtra("id", task.getId());
         taskDetailIntent.putExtra("title", "" + task.getTitle());
         taskDetailIntent.putExtra("description", "" + task.getBody());
@@ -151,56 +178,11 @@ public class MainActivity extends AppCompatActivity implements TaskAdapter.OnTas
                     }
 
                     @Override
-                    public void onError(Exception e) {
-                        Log.e(COGNITO, e.getMessage());
+                    public void onError(Exception error) {
+                        Log.e(COGNITO, error.getMessage());
                     }
                 });
     }
-
-//    class GetTasksFromBackendServer implements Callback {
-//
-//        private static final String TAG = "nguyen.Callback";
-//        MainActivity mainActivityInstance;
-//
-//        public GetTasksFromBackendServer (MainActivity mainActivityInstance) {
-//            this.mainActivityInstance = mainActivityInstance;
-//        }
-//
-//        @Override
-//        public void onFailure(@NotNull Call call, @NotNull IOException e) {
-//            Log.e(TAG, "something went wrong with connecting to backend server");
-//            Log.e(TAG, e.getMessage());
-//        }
-//
-//        @Override
-//        public void onResponse(@NotNull Call call, @NotNull Response response) throws IOException {
-//            String allTasks = response.body().string();
-//            Log.i(TAG, allTasks);
-//            Gson gson = new Gson();
-//            Task[] listOfTasksFromServer = gson.fromJson(allTasks, Task[].class);
-//
-//            db = Room.databaseBuilder(getApplicationContext(), AppDatabase.class, "taskmaster")
-//                    .allowMainThreadQueries().build();
-//
-//            Handler handlerForMainThread = new Handler(Looper.getMainLooper()) {
-//                @Override
-//                public void handleMessage(Message inputMessage) {
-//                    Task[] listOfTasks = (Task[])inputMessage.obj;
-//                    for (Task task: listOfTasks) {
-//                        if (db.taskDao().getTasksByTitleAndBody(task.getTitle(), task.getBody()) == null) {
-//                            db.taskDao().addTask(task);
-//                        }
-//                    }
-//                    mainActivityInstance.tasks = db.taskDao().getAll();
-//                    recyclerView = findViewById(R.id.recycler_tasks);
-//                    recyclerView.setLayoutManager(new LinearLayoutManager(mainActivityInstance));
-//                    recyclerView.setAdapter(new TaskAdapter(mainActivityInstance.tasks, mainActivityInstance));
-//                }
-//            };
-//            Message completeMessage = handlerForMainThread.obtainMessage(0, listOfTasksFromServer);
-//            completeMessage.sendToTarget();
-//        }
-//    }
 
     ////////////////////////// AWS GraphQL methods ////////////////////////////
 
@@ -233,8 +215,8 @@ public class MainActivity extends AppCompatActivity implements TaskAdapter.OnTas
         }
 
         @Override
-        public void onFailure(@Nonnull ApolloException e) {
-            Log.e(TAG, e.getMessage());
+        public void onFailure(@Nonnull ApolloException error) {
+            Log.e(TAG, error.getMessage());
         }
     };
 
@@ -265,8 +247,8 @@ public class MainActivity extends AppCompatActivity implements TaskAdapter.OnTas
         }
 
         @Override
-        public void onFailure(@Nonnull ApolloException e) {
-            Log.e(TAG, e.getMessage());
+        public void onFailure(@Nonnull ApolloException error) {
+            Log.e(TAG, error.getMessage());
         }
     };
 
@@ -307,7 +289,7 @@ public class MainActivity extends AppCompatActivity implements TaskAdapter.OnTas
 
         @Override
         public void onFailure(@Nonnull ApolloException e) {
-            Log.e("error", "error getting teams from cloud database");
+            Log.e("Error", "Error pulling teams from cloud database");
         }
     };
 
@@ -322,9 +304,7 @@ public class MainActivity extends AppCompatActivity implements TaskAdapter.OnTas
     }
 
     @Override
-    public void onNothingSelected(AdapterView<?> parent) {
-
-    }
+    public void onNothingSelected(AdapterView<?> parent) {}
 
     //////////////////////////////// AWS Pinpoint Service /////////////////////////////////////////
 
@@ -338,8 +318,8 @@ public class MainActivity extends AppCompatActivity implements TaskAdapter.OnTas
                 }
 
                 @Override
-                public void onError(Exception e) {
-                    Log.e("INIT", "Initialization error.", e);
+                public void onError(Exception error) {
+                    Log.e("INIT", "Initialization error.", error);
                 }
             });
 

@@ -1,0 +1,38 @@
+type Task @model {
+  id: ID!
+  title: String!
+  body: String
+  state: TaskState!
+  fileKey: String
+  location: String
+  team: Team @connection(name:"TeamTasks")
+}
+
+enum TaskState {
+  NEW
+  ASSIGNED
+  IN_PROGRESS
+  COMPLETE
+}
+
+type Team @model {
+  id: ID!
+  name: String!
+  tasks: [Task] @connection(name:"TeamTasks")
+}
+
+input S3ObjectInput {
+  bucket: String!
+  key: String!
+  region: String!
+  localUri: String
+  mimeType: String
+}
+
+type S3Object @model {
+  bucket: String!
+  key: String!
+  region: String!
+  localUri: String
+  mimeType: String
+}

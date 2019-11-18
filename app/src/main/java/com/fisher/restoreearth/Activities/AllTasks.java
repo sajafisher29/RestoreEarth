@@ -1,9 +1,7 @@
 package com.fisher.restoreearth.Activities;
 
 import androidx.appcompat.app.AppCompatActivity;
-
 import android.os.Bundle;
-
 import com.fisher.restoreearth.R;
 
 public class AllTasks extends AppCompatActivity {

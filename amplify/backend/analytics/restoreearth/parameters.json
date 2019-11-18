@@ -1,0 +1,20 @@
+{
+    "appName": "restoreearth",
+    "roleName": "pinpointLambdaRole5fa5d572",
+    "cloudWatchPolicyName": "cloudWatchPolicy5fa5d572",
+    "pinpointPolicyName": "pinpointPolicy5fa5d572",
+    "authPolicyName": "pinpoint_amplify_5fa5d572",
+    "unauthPolicyName": "pinpoint_amplify_5fa5d572",
+    "authRoleName": {
+        "Ref": "AuthRoleName"
+    },
+    "unauthRoleName": {
+        "Ref": "UnauthRoleName"
+    },
+    "authRoleArn": {
+        "Fn::GetAtt": [
+            "AuthRole",
+            "Arn"
+        ]
+    }
+}
